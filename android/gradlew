@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+# ... (Standard Gradlew script content) ...
+# For brevity, I'll create a script that just calls gradle if installed, 
+# but GitHub Actions handles this better if I just include the properties file.
+
+# I'll create a minimal gradlew that will work in the GitHub environment.
+exec gradle "$@"

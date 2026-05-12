@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailor Management Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="text-slate-800">
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 bg-slate-900 text-white p-6 hidden lg:block">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <i class="fas fa-cut"></i>
+            </div>
+            <h1 class="text-xl font-bold">TailorPro</h1>
+        </div>
+        <nav class="space-y-4">
+            <a href="#" class="flex items-center gap-3 p-3 bg-indigo-600 rounded-lg text-white"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a href="#" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition"><i class="fas fa-clipboard-list"></i> Orders</a>
+            <a href="#" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition"><i class="fas fa-users"></i> Employees</a>
+            <a href="#" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition"><i class="fas fa-user-tag"></i> Customers</a>
+            <a href="#" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition mt-20"><i class="fas fa-cog"></i> Settings</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 p-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-900">Workshop Overview</h2>
+                <p class="text-slate-500">Welcome back, Admin</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="bg-indigo-600 text-white px-6 py-2.5 rounded-full font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">
+                    + New Order
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl"><i class="fas fa-users text-xl"></i></div>
+                </div>
+                <h3 class="text-slate-500 font-medium">Total Employees</h3>
+                <p class="text-3xl font-bold mt-1" id="stat-employees">0</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl"><i class="fas fa-clock text-xl"></i></div>
+                </div>
+                <h3 class="text-slate-500 font-medium">Active Orders</h3>
+                <p class="text-3xl font-bold mt-1" id="stat-active">0</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><i class="fas fa-check-circle text-xl"></i></div>
+                </div>
+                <h3 class="text-slate-500 font-medium">Completed</h3>
+                <p class="text-3xl font-bold mt-1" id="stat-completed">0</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl"><i class="fas fa-indian-rupee-sign text-xl"></i></div>
+                </div>
+                <h3 class="text-slate-500 font-medium">Total Income</h3>
+                <p class="text-3xl font-bold mt-1" id="stat-income">₹0</p>
+            </div>
+        </div>
+
+        <!-- Recent Orders Table -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b border-slate-50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-900">Recent Stitching Orders</h3>
+                <button class="text-indigo-600 font-semibold text-sm">View All</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 text-xs uppercase font-bold tracking-wider">
+                            <th class="px-6 py-4">Order ID</th>
+                            <th class="px-6 py-4">Customer</th>
+                            <th class="px-6 py-4">Cloth Type</th>
+                            <th class="px-6 py-4">Delivery</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-body" class="divide-y divide-slate-50">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000/api";
+
+        async function loadDashboard() {
+            try {
+                // Fetch Stats
+                const statsRes = await fetch(`${API_BASE}/orders/dashboard_stats/`);
+                const stats = await statsRes.json();
+                
+                document.getElementById('stat-employees').innerText = stats.total_employees;
+                document.getElementById('stat-active').innerText = stats.active_orders;
+                document.getElementById('stat-completed').innerText = stats.completed_orders;
+                document.getElementById('stat-income').innerText = `₹${stats.total_income}`;
+
+                // Fetch Orders
+                const ordersRes = await fetch(`${API_BASE}/orders/`);
+                const orders = await ordersRes.json();
+                
+                const body = document.getElementById('orders-body');
+                body.innerHTML = orders.slice(0, 5).map(order => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-6 py-4 font-medium text-slate-900">#${order.id}</td>
+                        <td class="px-6 py-4">${order.customer_name}</td>
+                        <td class="px-6 py-4 capitalize">${order.cloth_type}</td>
+                        <td class="px-6 py-4 text-slate-500">${order.delivery_date}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${getStatusClass(order.status)}">
+                                ${order.status.replace('_', ' ')}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-900">₹${order.total_amount}</td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                console.error("Failed to load data", error);
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'completed': return 'bg-emerald-100 text-emerald-700';
+                case 'pending': return 'bg-amber-100 text-amber-700';
+                case 'in_progress': return 'bg-blue-100 text-blue-700';
+                default: return 'bg-slate-100 text-slate-700';
+            }
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>
